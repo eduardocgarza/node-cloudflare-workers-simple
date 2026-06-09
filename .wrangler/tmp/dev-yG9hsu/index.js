@@ -42,9 +42,9 @@ __name(handleRoot, "handleRoot");
 
 // src/handlers/hello.js
 function handleHello({ url }) {
-  const name = url.searchParams.get("name") || "world";
+  const name = url.searchParams.get("name") || "red";
   return json({
-    message: `Hello, ${name}`
+    message: `Morning, ${name}`
   });
 }
 __name(handleHello, "handleHello");
