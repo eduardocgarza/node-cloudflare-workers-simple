@@ -1,68 +1,44 @@
+import { handleEcho } from "./handlers/echo.js";
+import { handleRoot } from "./handlers/root.js";
+import { handleHello } from "./handlers/hello.js";
+import { handleHealth } from "./handlers/health.js";
+import { handleNotFound } from "./handlers/not-found.js";
+
+const routes = [
+  {
+    method: "GET",
+    pathname: "/",
+    handler: handleRoot,
+  },
+  {
+    method: "GET",
+    pathname: "/api/health",
+    handler: handleHealth,
+  },
+  {
+    method: "GET",
+    pathname: "/api/hello",
+    handler: handleHello,
+  },
+  {
+    method: "POST",
+    pathname: "/api/echo",
+    handler: handleEcho,
+  },
+];
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-
-    // GET /
-    if (url.pathname === "/" && request.method === "GET") {
-      return json({
-        message: "Cloudflare Worker API is running",
-        service: "cloudflare-worker-api",
-      });
-    }
-
-    // GET /api/health
-    if (url.pathname === "/api/health" && request.method === "GET") {
-      return json({
-        ok: true,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // GET /api/hello?name=Eduardo
-    if (url.pathname === "/api/hello" && request.method === "GET") {
-      const name = url.searchParams.get("name") || "world";
-
-      return json({
-        message: `Hello, ${name}`,
-      });
-    }
-
-    // POST /api/echo
-    if (url.pathname === "/api/echo" && request.method === "POST") {
-      let body;
-
-      try {
-        body = await request.json();
-      } catch {
-        return json(
-          {
-            error: "Invalid JSON body",
-          },
-          400,
-        );
-      }
-
-      return json({
-        youSent: body,
-      });
-    }
-
-    // 404
-    return json(
-      {
-        error: "Route not found",
-        path: url.pathname,
-      },
-      404,
+    const route = routes.find(
+      ({ method, pathname }) =>
+        request.method === method && url.pathname === pathname,
     );
+
+    if (route) {
+      return route.handler({ request, env, ctx, url });
+    }
+
+    return handleNotFound({ url });
   },
 };
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data, null, 2), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-}
