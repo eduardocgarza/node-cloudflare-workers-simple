@@ -44,7 +44,7 @@ __name(handleRoot, "handleRoot");
 function handleHello({ url }) {
   const name = url.searchParams.get("name") || "red";
   return json({
-    message: `Morning, ${name}`
+    message: `Hellooooo, ${name}`
   });
 }
 __name(handleHello, "handleHello");
